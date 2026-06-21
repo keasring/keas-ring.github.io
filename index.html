@@ -1,11 +1,521 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <title>Мой первый сайт на GitHub</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KeasRing – Визитка</title>
+  <!-- Font Awesome для иконок -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ----- CSS-переменные для светлой/тёмной темы ----- */
+    :root {
+      --bg: #fef9f0;
+      --card-bg: #ffffff;
+      --text: #2d2a24;
+      --accent: #e67e22;
+      --accent-light: #f39c12;
+      --border: #f0d5b0;
+      --shadow: rgba(230, 126, 34, 0.2);
+      --btn-bg: #f1e3d0;
+      --btn-text: #2d2a24;
+      --input-bg: #ffffff;
+    }
+    [data-theme="dark"] {
+      --bg: #1e1b16;
+      --card-bg: #2c2822;
+      --text: #f0e6d8;
+      --accent: #f39c12;
+      --accent-light: #e67e22;
+      --border: #4a3f33;
+      --shadow: rgba(243, 156, 18, 0.3);
+      --btn-bg: #3d352b;
+      --btn-text: #f0e6d8;
+      --input-bg: #3d352b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      transition: background-color 0.3s, color 0.2s, border-color 0.3s, box-shadow 0.3s;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ----- Контейнер выбора языка (по умолчанию виден) ----- */
+    .language-screen {
+      max-width: 500px;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 32px;
+      padding: 48px 32px 40px;
+      text-align: center;
+      box-shadow: 0 12px 40px var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .language-screen h1 {
+      font-weight: 400;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      margin-bottom: 40px;
+      color: var(--accent);
+    }
+    .lang-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .lang-btn {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      padding: 14px 44px;
+      border-radius: 60px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .lang-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px var(--shadow);
+      border-color: var(--accent);
+    }
+    .lang-btn:active {
+      transform: scale(0.96);
+    }
+    .lang-btn i {
+      margin-right: 10px;
+      color: var(--accent);
+    }
+
+    /* ----- Основной профиль (скрыт до выбора языка) ----- */
+    .profile {
+      max-width: 700px;
+      width: 100%;
+      margin: 0 auto;
+      display: none; /* скрыт по умолчанию */
+      animation: fadeUp 0.6s ease;
+    }
+    .profile.visible {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 40px;
+      padding: 40px 32px 32px;
+      box-shadow: 0 12px 40px var(--shadow);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    /* Переключатель темы (в углу карточки) */
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: var(--btn-bg);
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 60px;
+      font-size: 1.4rem;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .theme-toggle:hover {
+      transform: rotate(20deg);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* Аватарка (круглая) */
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--border);
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 4px solid var(--accent);
+      box-shadow: 0 8px 20px var(--shadow);
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* Заглушка, если картинки нет */
+    .avatar-placeholder {
+      font-size: 3.8rem;
+      color: var(--accent);
+      opacity: 0.6;
+      font-weight: 300;
+    }
+
+    .nick {
+      font-size: 2.4rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .sub-nick {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--accent);
+      opacity: 0.8;
+      margin: -4px 0 16px;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+    .description {
+      text-align: center;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      max-width: 480px;
+      margin: 0 auto 28px;
+      padding: 0 6px;
+      color: var(--text);
+      opacity: 0.9;
+    }
+
+    /* Кнопки-ссылки */
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      padding: 12px 24px;
+      border-radius: 60px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .link-btn i {
+      font-size: 1.2rem;
+      width: 1.4rem;
+      text-align: center;
+    }
+    /* Цвет иконок под платформу */
+    .link-btn.discord i { color: #5865F2; }
+    .link-btn.youtube i { color: #FF0000; }
+    .link-btn.roblox i { color: #C0C0C0; }
+    .link-btn.telegram i { color: #26A5E4; }
+
+    .link-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px var(--shadow);
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+    .link-btn:hover i {
+      color: #fff !important;
+    }
+
+    /* Кликер */
+    .clicker-area {
+      background: var(--btn-bg);
+      border-radius: 28px;
+      padding: 18px 22px 22px;
+      margin: 12px 0 30px;
+      border: 1px solid var(--border);
+    }
+    .clicker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--text);
+      opacity: 0.8;
+    }
+    .clicker-header span:last-child {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .clicker-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 60px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 6px 0 #b85e0e;
+      letter-spacing: 1px;
+    }
+    .clicker-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #b85e0e;
+    }
+    .clicker-btn:hover {
+      background: var(--accent-light);
+    }
+    .clicker-count {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: right;
+    }
+
+    /* Таймеры */
+    .timers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .timer-item {
+      flex: 1 1 150px;
+      background: var(--btn-bg);
+      border-radius: 24px;
+      padding: 16px 12px 14px;
+      text-align: center;
+      border: 1px solid var(--border);
+      min-width: 120px;
+    }
+    .timer-item .label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0.7;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+    .timer-item .value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Адаптив */
+    @media (max-width: 600px) {
+      .language-screen { padding: 32px 20px; }
+      .lang-btn { padding: 12px 28px; font-size: 1.1rem; }
+      .profile .card { padding: 28px 16px 24px; }
+      .avatar { width: 100px; height: 100px; }
+      .nick { font-size: 1.8rem; }
+      .link-btn { padding: 10px 16px; font-size: 0.85rem; }
+      .clicker-btn { font-size: 1.3rem; padding: 14px; }
+      .timers { gap: 10px; }
+      .timer-item { flex: 1 1 100px; padding: 12px 8px; }
+      .timer-item .value { font-size: 1.5rem; }
+    }
+
+    /* Утилиты */
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
-    <h1>Привет, мир!</h1>
-    <p>пока только создал, дальше сделаю больше.</p>
+
+<!-- ===== ЭКРАН ВЫБОРА ЯЗЫКА ===== -->
+<div class="language-screen" id="languageScreen">
+  <h1>SELECT LANGUAGE</h1>
+  <div class="lang-buttons">
+    <button class="lang-btn" data-lang="ru"><i class="fas fa-language"></i> РУССКИЙ</button>
+    <button class="lang-btn" data-lang="en"><i class="fas fa-language"></i> ENGLISH</button>
+  </div>
+</div>
+
+<!-- ===== ПРОФИЛЬ (визитка) ===== -->
+<div class="profile" id="profile">
+  <div class="card">
+
+    <!-- Кнопка переключения темы -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+      <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- Аватарка (круглая) -->
+    <div class="avatar" id="avatarContainer">
+      <!-- ВСТАВЬТЕ СВОЁ ИЗОБРАЖЕНИЕ: замените src на путь к вашему файлу (например, avatar.png) -->
+      <img src="https://via.placeholder.com/120/cccccc/999999?text=👤" alt="Avatar" id="avatarImg">
+      <!-- Если хотите убрать картинку и оставить плейсхолдер, закомментируйте <img> и раскомментируйте <span> ниже -->
+      <!-- <span class="avatar-placeholder">👤</span> -->
+    </div>
+
+    <!-- Ник и подтекст -->
+    <div class="nick">KeasRing</div>
+    <div class="sub-nick">a.k.a Keas / KeasDev / Kes / Keks</div>
+
+    <!-- Описание (перевод на русский и английский) -->
+    <div class="description" id="description">
+      Привет всем! Я создатель Roblox игр, также создаю развлекательный контент на YouTube!
+    </div>
+
+    <!-- Кнопки-ссылки -->
+    <div class="links">
+      <a href="#" class="link-btn discord" target="_blank"><i class="fab fa-discord"></i> Discord</a>
+      <a href="#" class="link-btn youtube" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
+      <a href="#" class="link-btn roblox" target="_blank"><i class="fab fa-roblox"></i> Roblox</a>
+      <a href="#" class="link-btn telegram" target="_blank"><i class="fab fa-telegram-plane"></i> Telegram</a>
+    </div>
+
+    <!-- Кликер -->
+    <div class="clicker-area">
+      <div class="clicker-header">
+        <span>🔘 Потыкайте!</span>
+        <span class="clicker-count" id="clickCount">0</span>
+      </div>
+      <button class="clicker-btn" id="clickerBtn">Клик!</button>
+    </div>
+
+    <!-- Таймеры -->
+    <div class="timers">
+      <div class="timer-item">
+        <div class="label">Мой день рождения</div>
+        <div class="value" id="timerBirthday">--</div>
+      </div>
+      <div class="timer-item">
+        <div class="label">Новый год</div>
+        <div class="value" id="timerNewYear">--</div>
+      </div>
+      <div class="timer-item">
+        <div class="label">До моей игры</div>
+        <div class="value" id="timerGame">--</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ----- УПРАВЛЕНИЕ ЯЗЫКОМ -----
+  const langScreen = document.getElementById('languageScreen');
+  const profile = document.getElementById('profile');
+  const description = document.getElementById('description');
+  const langButtons = document.querySelectorAll('.lang-btn');
+
+  // Тексты описания
+  const texts = {
+    ru: 'Привет всем! Я создатель Roblox игр, также создаю развлекательный контент на YouTube!',
+    en: 'Hi everyone! I\'m a Roblox game developer and also create entertaining content on YouTube!'
+  };
+
+  langButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lang = btn.dataset.lang;
+      description.textContent = texts[lang] || texts.ru;
+      // Показываем профиль, скрываем выбор языка
+      langScreen.style.display = 'none';
+      profile.classList.add('visible');
+    });
+  });
+
+  // ----- ПЕРЕКЛЮЧЕНИЕ ТЕМЫ (светлая/тёмная) -----
+  const themeToggle = document.getElementById('themeToggle');
+  const icon = themeToggle.querySelector('i');
+  let currentTheme = 'light'; // по умолчанию
+
+  themeToggle.addEventListener('click', () => {
+    if (currentTheme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      icon.className = 'fas fa-sun';
+      currentTheme = 'dark';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      icon.className = 'fas fa-moon';
+      currentTheme = 'light';
+    }
+  });
+
+  // ----- КЛИКЕР -----
+  let clicks = 0;
+  const clickCountEl = document.getElementById('clickCount');
+  const clickerBtn = document.getElementById('clickerBtn');
+
+  clickerBtn.addEventListener('click', () => {
+    clicks++;
+    clickCountEl.textContent = clicks;
+    // Маленькая анимация
+    clickerBtn.style.transform = 'scale(0.96)';
+    setTimeout(() => clickerBtn.style.transform = '', 100);
+  });
+
+  // ----- ТАЙМЕРЫ (обратный отсчёт) -----
+  const timerBirthday = document.getElementById('timerBirthday');
+  const timerNewYear = document.getElementById('timerNewYear');
+  const timerGame = document.getElementById('timerGame');
+
+  function updateTimers() {
+    const now = new Date();
+
+    // 1) День рождения: 18 июля 2026 (время 00:00)
+    const birthday = new Date(2026, 6, 18, 0, 0, 0);
+    // 2) Новый год: 1 января 2027
+    const newYear = new Date(2027, 0, 1, 0, 0, 0);
+    // 3) Релиз игры: 20 июля 2026
+    const gameRelease = new Date(2026, 6, 20, 0, 0, 0);
+
+    function formatDiff(target) {
+      const diff = target - now;
+      if (diff <= 0) return '🎉';
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+      return `${days}д ${hours}ч ${mins}м ${secs}с`;
+    }
+
+    timerBirthday.textContent = formatDiff(birthday);
+    timerNewYear.textContent = formatDiff(newYear);
+    timerGame.textContent = formatDiff(gameRelease);
+  }
+
+  updateTimers();
+  setInterval(updateTimers, 1000);
+
+  // ----- ИНСТРУКЦИЯ ПО АВАТАРКЕ (в консоль) -----
+  console.log('🔹 Для замены аватарки: отредактируйте тег <img> внутри .avatar в HTML.');
+  console.log('   Замените src="https://via.placeholder.com/..." на путь к вашему изображению.');
+  console.log('   Рекомендуемый размер: 120x120 пикселей (квадрат).');
+</script>
+
 </body>
 </html>
